@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Pump System Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            color: #4CAF50;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.2rem;
+        }
+        
+        .status-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .status.granted {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .status.denied {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .status.waiting {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+        }
+        
+        .lcd-display {
+            background-color: #0a2f0a;
+            color: #7fff7f;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            border: 2px solid #1a5f1a;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .lcd-line {
+            margin-bottom: 5px;
+            min-height: 24px;
+        }
+        
+        .pump-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .pump-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pump-btn:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .pump-btn.active {
+            background-color: #2e7d32;
+        }
+        
+        .pump-btn i {
+            font-size: 1.5rem;
+        }
+        
+        .pump-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+        
+        .pump-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .pump-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .card-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+        }
+        
+        .card-icon {
+            background-color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .card-uid {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #4CAF50;
+        }
+        
+        .bluetooth-section {
+            grid-column: span 2;
+        }
+        
+        .bluetooth-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .bluetooth-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background-color: #1a237e;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .bluetooth-btn:hover {
+            background-color: #283593;
+        }
+        
+        .bluetooth-btn.connected {
+            background-color: #1b5e20;
+        }
+        
+        .bluetooth-btn.scanning {
+            background-color: #ff6f00;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .devices-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .device-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #2a2a2a;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .device-item:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .device-item.connected {
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .device-icon {
+            margin-right: 15px;
+            color: #2196F3;
+        }
+        
+        .log-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        
+        .log-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .log-entries {
+            background-color: #1a1a1a;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #2a2a2a;
+            color: #ccc;
+        }
+        
+        .log-entry.success {
+            color: #4CAF50;
+        }
+        
+        .log-entry.error {
+            color: #f44336;
+        }
+        
+        .log-entry.info {
+            color: #2196F3;
+        }
+        
+        .log-time {
+            color: #777;
+            margin-right: 10px;
+        }
+        
+        .pump-active {
+            animation: pumpActive 2s infinite;
+        }
+        
+        @keyframes pumpActive {
+            0% { background-color: #2e7d32; }
+            50% { background-color: #1b5e20; }
+            100% { background-color: #2e7d32; }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-title {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: flex-end;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .modal-btn.primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .modal-btn.secondary {
+            background-color: #666;
+            color: white;
+        }
+        
+        .data-display {
+            font-family: 'Courier New', monospace;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .bluetooth-section {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tint"></i> RFID Pump System</h1>
+            <p class="subtitle">RFID-controlled liquid dispensing system with Bluetooth connectivity</p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- System Status Card -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-info-circle"></i> System Status</h2>
+                <div class="status-container">
+                    <div>
+                        <div class="status waiting">Waiting for RFID</div>
+                    </div>
+                    <div id="connection-status">
+                        <i class="fas fa-plug" style="color: #aaa; margin-right: 5px;"></i>
+                        <span>Disconnected</span>
+                    </div>
+                </div>
+                
+                <div class="lcd-display">
+                    <div class="lcd-line" id="lcd-line1">RFID Pump Sys</div>
+                    <div class="lcd-line" id="lcd-line2">Scan Card...</div>
+                </div>
+                
+                <div class="cards-list">
+                    <h3 style="margin-bottom: 10px; color: #aaa; font-size: 1rem;">Authorized Cards:</h3>
+                    <div class="card-item">
+                        <div class="card-icon">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div class="card-uid">F9 64 82 2B</div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-icon">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div class="card-uid">B3 E1 7E 56</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pump Controls Card -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-sliders-h"></i> Pump Controls</h2>
+                <p style="margin-bottom: 15px; color: #aaa;">Select quantity after RFID authentication:</p>
+                
+                <div class="pump-controls">
+                    <button class="pump-btn" id="pump-500ml" disabled>
+                        <i class="fas fa-toggle-off"></i>
+                        <div class="pump-info">
+                            <span class="pump-title">500 ml</span>
+                            <span class="pump-desc">5 seconds pumping time</span>
+                        </div>
+                        <div>SW1</div>
+                    </button>
+                    
+                    <button class="pump-btn" id="pump-1000ml" disabled>
+                        <i class="fas fa-toggle-off"></i>
+                        <div class="pump-info">
+                            <span class="pump-title">1000 ml</span>
+                            <span class="pump-desc">10 seconds pumping time</span>
+                        </div>
+                        <div>SW2</div>
+                    </button>
+                    
+                    <button class="pump-btn" id="pump-1500ml" disabled>
+                        <i class="fas fa-toggle-off"></i>
+                        <div class="pump-info">
+                            <span class="pump-title">1500 ml</span>
+                            <span class="pump-desc">15 seconds pumping time</span>
+                        </div>
+                        <div>SW3</div>
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #333;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: bold;">Relay Status</div>
+                            <div id="relay-status" style="color: #aaa;">OFF (Active-Low)</div>
+                        </div>
+                        <div id="pump-indicator" style="width: 20px; height: 20px; border-radius: 50%; background-color: #333;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bluetooth Connectivity Card -->
+            <div class="card bluetooth-section">
+                <h2 class="card-title"><i class="fab fa-bluetooth-b"></i> Bluetooth Connectivity</h2>
+                <p style="margin-bottom: 15px; color: #aaa;">Connect to Arduino via Bluetooth to monitor and control the system remotely.</p>
+                
+                <div class="bluetooth-controls">
+                    <button class="bluetooth-btn" id="bt-connect">
+                        <i class="fas fa-link"></i> Connect Bluetooth
+                    </button>
+                    <button class="bluetooth-btn" id="bt-scan">
+                        <i class="fas fa-search"></i> Scan Devices
+                    </button>
+                    <button class="bluetooth-btn" id="bt-disconnect" disabled>
+                        <i class="fas fa-unlink"></i> Disconnect
+                    </button>
+                    <button class="bluetooth-btn" id="bt-send-test">
+                        <i class="fas fa-paper-plane"></i> Send Test
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 10px; color: #aaa; font-size: 1rem;">Received Data:</h3>
+                    <div class="data-display" id="received-data">
+                        No data received
+                    </div>
+                </div>
+                
+                <div class="devices-list" id="bt-devices">
+                    <!-- Bluetooth devices will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Log -->
+        <div class="log-container">
+            <div class="log-title">
+                <h2><i class="fas fa-clipboard-list"></i> System Log</h2>
+                <button id="clear-log" style="background: none; border: none; color: #aaa; cursor: pointer;">
+                    <i class="fas fa-trash-alt"></i> Clear Log
+                </button>
+            </div>
+            <div class="log-entries" id="log-entries">
+                <div class="log-entry info">
+                    <span class="log-time" id="current-time"></span> System initialized
+                </div>
+                <div class="log-entry">
+                    <span class="log-time" id="current-time2"></span> Waiting for RFID card...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bluetooth Connection Modal -->
+    <div class="modal" id="bluetooth-modal">
+        <div class="modal-content">
+            <h2 class="modal-title"><i class="fab fa-bluetooth-b"></i> Bluetooth Connection</h2>
+            <div id="modal-message">
+                <p>Click "Connect" to pair with an available Bluetooth device.</p>
+                <p><strong>Note:</strong> Your browser must support Web Bluetooth API (Chrome, Edge, Opera).</p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="modal-cancel">Cancel</button>
+                <button class="modal-btn primary" id="modal-connect">Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System state
+        const systemState = {
+            accessGranted: false,
+            pumpActive: false,
+            bluetoothConnected: false,
+            bluetoothDevice: null,
+            bluetoothServer: null,
+            bluetoothService: null,
+            bluetoothCharacteristic: null,
+            currentCard: null
+        };
+        
+        // DOM elements
+        const lcdLine1 = document.getElementById('lcd-line1');
+        const lcdLine2 = document.getElementById('lcd-line2');
+        const pumpButtons = [
+            document.getElementById('pump-500ml'),
+            document.getElementById('pump-1000ml'),
+            document.getElementById('pump-1500ml')
+        ];
+        const relayStatus = document.getElementById('relay-status');
+        const pumpIndicator = document.getElementById('pump-indicator');
+        const btConnectBtn = document.getElementById('bt-connect');
+        const btScanBtn = document.getElementById('bt-scan');
+        const btDisconnectBtn = document.getElementById('bt-disconnect');
+        const btSendTestBtn = document.getElementById('bt-send-test');
+        const connectionStatus = document.getElementById('connection-status');
+        const logEntries = document.getElementById('log-entries');
+        const receivedData = document.getElementById('received-data');
+        const bluetoothModal = document.getElementById('bluetooth-modal');
+        const modalConnectBtn = document.getElementById('modal-connect');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+        const modalMessage = document.getElementById('modal-message');
+        
+        // Update time in log entries
+        function updateLogTime() {
+            const now = new Date();
+            const timeString = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+            
+            document.querySelectorAll('.log-time').forEach(el => {
+                if (!el.id.includes('current')) {
+                    el.textContent = timeString;
+                }
+            });
+        }
+        
+        // Set initial time
+        updateLogTime();
+        setInterval(updateLogTime, 1000);
+        
+        // Add log entry
+        function addLogEntry(message, type = 'info') {
+            const now = new Date();
+            const timeString = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<span class="log-time">${timeString}</span> ${message}`;
+            
+            logEntries.appendChild(logEntry);
+            logEntries.scrollTop = logEntries.scrollHeight;
+        }
+        
+        // Update received data display
+        function updateReceivedData(data) {
+            receivedData.textContent = data;
+            receivedData.scrollTop = receivedData.scrollHeight;
+        }
+        
+        // Check if Web Bluetooth is supported
+        function checkBluetoothSupport() {
+            if (!navigator.bluetooth) {
+                addLogEntry('Web Bluetooth API is not supported in this browser. Try Chrome, Edge, or Opera.', 'error');
+                btConnectBtn.disabled = true;
+                btScanBtn.disabled = true;
+                modalMessage.innerHTML = `
+                    <p style="color: #f44336;">Web Bluetooth API is not supported in your browser.</p>
+                    <p>Please use one of the following browsers:</p>
+                    <ul>
+                        <li>Google Chrome (Desktop & Android)</li>
+                        <li>Microsoft Edge (Desktop)</li>
+                        <li>Opera (Desktop)</li>
+                    </ul>
+                    <p>Also ensure you're using HTTPS or localhost.</p>
+                `;
+                return false;
+            }
+            return true;
+        }
+        
+        // Connect to Bluetooth device
+        async function connectBluetooth() {
+            if (!checkBluetoothSupport()) return;
+            
+            try {
+                addLogEntry('Requesting Bluetooth device...', 'info');
+                
+                // Request Bluetooth device with specific service
+                systemState.bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [
+                        { name: 'HC-05' }, // Common Bluetooth module name
+                        { name: 'HC-06' },
+                        { namePrefix: 'RFID' },
+                        { namePrefix: 'Arduino' }
+                    ],
+                    optionalServices: [
+                        '00001101-0000-1000-8000-00805f9b34fb', // Serial Port Profile (SPP)
+                        '6e400001-b5a3-f393-e0a9-e50e24dcca9e'  // Nordic UART Service
+                    ]
+                });
+                
+                addLogEntry(`Connected to device: ${systemState.bluetoothDevice.name}`, 'success');
+                
+                // Connect to GATT Server
+                systemState.bluetoothServer = await systemState.bluetoothDevice.gatt.connect();
+                addLogEntry('GATT server connected', 'info');
+                
+                // Get primary service (try SPP first, then Nordic UART)
+                let service;
+                try {
+                    service = await systemState.bluetoothServer.getPrimaryService('00001101-0000-1000-8000-00805f9b34fb');
+                    addLogEntry('Using Serial Port Profile service', 'info');
+                } catch (e) {
+                    service = await systemState.bluetoothServer.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+                    addLogEntry('Using Nordic UART service', 'info');
+                }
+                
+                systemState.bluetoothService = service;
+                
+                // Get characteristics
+                const characteristics = await service.getCharacteristics();
+                addLogEntry(`Found ${characteristics.length} characteristics`, 'info');
+                
+                // Look for TX characteristic (for receiving data)
+                for (const characteristic of characteristics) {
+                    if (characteristic.properties.notify) {
+                        systemState.bluetoothCharacteristic = characteristic;
+                        
+                        // Start notifications
+                        await characteristic.startNotifications();
+                        characteristic.addEventListener('characteristicvaluechanged', handleBluetoothData);
+                        addLogEntry('Started notifications on characteristic', 'success');
+                        break;
+                    }
+                }
+                
+                // Update UI
+                systemState.bluetoothConnected = true;
+                btConnectBtn.disabled = true;
+                btConnectBtn.classList.add('connected');
+                btConnectBtn.innerHTML = '<i class="fas fa-link"></i> Connected';
+                btDisconnectBtn.disabled = false;
+                btSendTestBtn.disabled = false;
+                
+                connectionStatus.innerHTML = '<i class="fas fa-plug" style="color: #4CAF50; margin-right: 5px;"></i><span>Connected to ' + systemState.bluetoothDevice.name + '</span>';
+                
+                addLogEntry('Bluetooth connection established successfully', 'success');
+                
+            } catch (error) {
+                addLogEntry(`Bluetooth connection failed: ${error.message}`, 'error');
+                console.error('Bluetooth connection error:', error);
+                
+                // Reset state
+                systemState.bluetoothConnected = false;
+                systemState.bluetoothDevice = null;
+                systemState.bluetoothServer = null;
+                systemState.bluetoothService = null;
+                systemState.bluetoothCharacteristic = null;
+                
+                btConnectBtn.disabled = false;
+                btConnectBtn.classList.remove('connected');
+                btConnectBtn.innerHTML = '<i class="fas fa-link"></i> Connect Bluetooth';
+                btDisconnectBtn.disabled = true;
+                btSendTestBtn.disabled = true;
+                
+                connectionStatus.innerHTML = '<i class="fas fa-plug" style="color: #aaa; margin-right: 5px;"></i><span>Disconnected</span>';
+            }
+        }
+        
+        // Handle incoming Bluetooth data
+        function handleBluetoothData(event) {
+            const value = event.target.value;
+            let dataString = '';
+            
+            // Convert data to string
+            for (let i = 0; i < value.byteLength; i++) {
+                dataString += String.fromCharCode(value.getUint8(i));
+            }
+            
+            if (dataString.trim()) {
+                updateReceivedData(dataString);
+                addLogEntry(`Received: ${dataString}`, 'info');
+                
+                // Parse commands from Arduino
+                parseArduinoCommand(dataString);
+            }
+        }
+        
+        // Parse commands from Arduino
+        function parseArduinoCommand(command) {
+            const cmd = command.trim();
+            
+            if (cmd.includes('Card UID:')) {
+                // Extract UID from message
+                const uidMatch = cmd.match(/Card UID: ([0-9A-F\s]+)/i);
+                if (uidMatch) {
+                    const uid = uidMatch[1].trim();
+                    addLogEntry(`RFID card detected: ${uid}`, 'info');
+                    
+                    // Check if authorized
+                    const authorizedCards = ['F9 64 82 2B', 'B3 E1 7E 56'];
+                    const isAuthorized = authorizedCards.some(card => 
+                        card.replace(/\s/g, '') === uid.replace(/\s/g, '')
+                    );
+                    
+                    if (isAuthorized) {
+                        simulateRFIDScan(0); // Simulate authorized access
+                        sendBluetoothData('ACCESS_GRANTED\n');
+                    } else {
+                        sendBluetoothData('ACCESS_DENIED\n');
+                    }
+                }
+            } else if (cmd.includes('Pump ON')) {
+                addLogEntry('Pump activated via Bluetooth', 'info');
+                // Update UI to show pump is on
+            } else if (cmd.includes('Pump OFF')) {
+                addLogEntry('Pump deactivated via Bluetooth', 'info');
+                // Update UI to show pump is off
+            }
+        }
+        
+        // Send data via Bluetooth
+        async function sendBluetoothData(data) {
+            if (!systemState.bluetoothConnected || !systemState.bluetoothCharacteristic) {
+                addLogEntry('Cannot send data: Not connected to Bluetooth', 'error');
+                return;
+            }
+            
+            try {
+                // Convert string to ArrayBuffer
+                const encoder = new TextEncoder();
+                const dataBuffer = encoder.encode(data);
+                
+                // Send data
+                await systemState.bluetoothCharacteristic.writeValue(dataBuffer);
+                addLogEntry(`Sent: ${data.trim()}`, 'info');
+                
+            } catch (error) {
+                addLogEntry(`Failed to send data: ${error.message}`, 'error');
+                console.error('Send error:', error);
+            }
+        }
+        
+        // Disconnect Bluetooth
+        async function disconnectBluetooth() {
+            if (systemState.bluetoothDevice && systemState.bluetoothDevice.gatt.connected) {
+                try {
+                    await systemState.bluetoothDevice.gatt.disconnect();
+                    addLogEntry('Bluetooth disconnected', 'info');
+                } catch (error) {
+                    console.error('Disconnect error:', error);
+                }
+            }
+            
+            // Reset state
+            systemState.bluetoothConnected = false;
+            systemState.bluetoothDevice = null;
+            systemState.bluetoothServer = null;
+            systemState.bluetoothService = null;
+            systemState.bluetoothCharacteristic = null;
+            
+            // Update UI
+            btConnectBtn.disabled = false;
+            btConnectBtn.classList.remove('connected');
+            btConnectBtn.innerHTML = '<i class="fas fa-link"></i> Connect Bluetooth';
+            btDisconnectBtn.disabled = true;
+            btSendTestBtn.disabled = true;
+            
+            connectionStatus.innerHTML = '<i class="fas fa-plug" style="color: #aaa; margin-right: 5px;"></i><span>Disconnected</span>';
+            
+            updateReceivedData('No data received');
+        }
+        
+        // Scan for Bluetooth devices
+        async function scanBluetoothDevices() {
+            if (!checkBluetoothSupport()) return;
+            
+            try {
+                addLogEntry('Scanning for Bluetooth devices...', 'info');
+                btScanBtn.classList.add('scanning');
+                btScanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+                
+                // Request device to trigger scanning
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [] // Empty to just scan
+                });
+                
+                addLogEntry(`Found device: ${device.name || 'Unknown'} (${device.id})`, 'info');
+                
+                // Add to devices list
+                const devicesList = document.getElementById('bt-devices');
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'device-item';
+                deviceItem.innerHTML = `
+                    <i class="fas fa-bluetooth device-icon"></i>
+                    <div>
+                        <div>${device.name || 'Unknown Device'}</div>
+                        <div style="font-size: 0.8rem; color: #aaa;">${device.id}</div>
+                    </div>
+                `;
+                
+                deviceItem.addEventListener('click', () => {
+                    addLogEntry(`Selected device: ${device.name || 'Unknown'}`, 'info');
+                    // You could auto-connect here
+                });
+                
+                devicesList.appendChild(deviceItem);
+                
+            } catch (error) {
+                if (error.name !== 'NotFoundError') {
+                    addLogEntry(`Scan error: ${error.message}`, 'error');
+                }
+            } finally {
+                btScanBtn.classList.remove('scanning');
+                btScanBtn.innerHTML = '<i class="fas fa-search"></i> Scan Devices';
+            }
+        }
+        
+        // Simulate RFID card scan
+        function simulateRFIDScan(cardIndex) {
+            if (systemState.pumpActive) return;
+            
+            const cards = [
+                { uid: "F9 64 82 2B", authorized: true },
+                { uid: "B3 E1 7E 56", authorized: true },
+                { uid: "C4 A2 9D 1F", authorized: false }
+            ];
+            
+            const card = cards[cardIndex || 0];
+            systemState.currentCard = card;
+            
+            lcdLine1.textContent = "Checking Card";
+            lcdLine2.textContent = "";
+            
+            addLogEntry(`RFID card scanned: ${card.uid}`, 'info');
+            
+            // Send to Arduino via Bluetooth if connected
+            if (systemState.bluetoothConnected) {
+                sendBluetoothData(`CARD_SCANNED:${card.uid}\n`);
+            }
+            
+            // Simulate checking after delay
+            setTimeout(() => {
+                if (card.authorized) {
+                    systemState.accessGranted = true;
+                    lcdLine1.textContent = "Access Granted";
+                    lcdLine2.textContent = "Select Quantity";
+                    
+                    // Enable pump buttons
+                    pumpButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.querySelector('i').className = 'fas fa-toggle-on';
+                        btn.style.cursor = 'pointer';
+                    });
+                    
+                    addLogEntry(`Access granted for card: ${card.uid}`, 'success');
+                    
+                    // Auto-disable after 30 seconds
+                    setTimeout(() => {
+                        if (!systemState.pumpActive) {
+                            resetSystem();
+                        }
+                    }, 30000);
+                } else {
+                    lcdLine1.textContent = "Access Denied";
+                    lcdLine2.textContent = "Scan Card...";
+                    addLogEntry(`Access denied for card: ${card.uid}`, 'error');
+                    
+                    setTimeout(() => {
+                        resetSystem();
+                    }, 2000);
+                }
+            }, 1500);
+        }
+        
+        // Reset system to initial state
+        function resetSystem() {
+            systemState.accessGranted = false;
+            systemState.currentCard = null;
+            
+            lcdLine1.textContent = "RFID Pump Sys";
+            lcdLine2.textContent = "Scan Card...";
+            
+            // Disable pump buttons
+            pumpButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('active');
+                btn.querySelector('i').className = 'fas fa-toggle-off';
+                btn.style.cursor = 'not-allowed';
+            });
+        }
+        
+        // Run pump simulation
+        function runPump(seconds, quantity, switchNum) {
+            if (!systemState.accessGranted || systemState.pumpActive) return;
+            
+            systemState.pumpActive = true;
+            
+            lcdLine1.textContent = "Pump ON";
+            lcdLine2.textContent = quantity;
+            
+            relayStatus.textContent = "ON (Active-Low)";
+            pumpIndicator.style.backgroundColor = '#4CAF50';
+            pumpIndicator.classList.add('pump-active');
+            
+            addLogEntry(`Pump started: ${quantity} (${seconds} seconds)`, 'info');
+            
+            // Send command to Arduino via Bluetooth
+            if (systemState.bluetoothConnected) {
+                sendBluetoothData(`PUMP_${switchNum}_ON\n`);
+            }
+            
+            // Simulate pump running
+            setTimeout(() => {
+                systemState.pumpActive = false;
+                
+                lcdLine1.textContent = "Pump OFF";
+                lcdLine2.textContent = "";
+                
+                relayStatus.textContent = "OFF (Active-Low)";
+                pumpIndicator.style.backgroundColor = '#333';
+                pumpIndicator.classList.remove('pump-active');
+                
+                addLogEntry(`Pump stopped: ${quantity} dispensed`, 'success');
+                
+                // Send stop command to Arduino
+                if (systemState.bluetoothConnected) {
+                    sendBluetoothData(`PUMP_OFF\n`);
+                }
+                
+                // Reset after delay
+                setTimeout(() => {
+                    resetSystem();
+                }, 2000);
+            }, seconds * 1000);
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            addLogEntry('RFID Pump System Interface loaded', 'info');
+            
+            // Check Bluetooth support
+            if (!checkBluetoothSupport()) {
+                addLogEntry('Web Bluetooth not available. Using simulation mode only.', 'warning');
+            }
+            
+            // RFID card simulation buttons (hidden in UI but accessible via keyboard shortcuts)
+            document.addEventListener('keydown', (e) => {
+                // Simulate RFID scan with number keys
+                if (e.key === '1') simulateRFIDScan(0); // Authorized card 1
+                if (e.key === '2') simulateRFIDScan(1); // Authorized card 2
+                if (e.key === '3') simulateRFIDScan(2); // Unauthorized card
+            });
+            
+            // Pump buttons
+            document.getElementById('pump-500ml').addEventListener('click', () => {
+                if (systemState.accessGranted && !systemState.pumpActive) {
+                    runPump(5, "500 ml", 1);
+                }
+            });
+            
+            document.getElementById('pump-1000ml').addEventListener('click', () => {
+                if (systemState.accessGranted && !systemState.pumpActive) {
+                    runPump(10, "1000 ml", 2);
+                }
+            });
+            
+            document.getElementById('pump-1500ml').addEventListener('click', () => {
+                if (systemState.accessGranted && !systemState.pumpActive) {
+                    runPump(15, "1500 ml", 3);
+                }
+            });
+            
+            // Bluetooth buttons
+            btConnectBtn.addEventListener('click', () => {
+                bluetoothModal.style.display = 'flex';
+            });
+            
+            btDisconnectBtn.addEventListener('click', disconnectBluetooth);
+            btScanBtn.addEventListener('click', scanBluetoothDevices);
+            
+            btSendTestBtn.addEventListener('click', () => {
+                if (systemState.bluetoothConnected) {
+                    sendBluetoothData('TEST_COMMAND\n');
+                } else {
+                    addLogEntry('Not connected to Bluetooth', 'error');
+                }
+            });
+            
+            // Modal buttons
+            modalConnectBtn.addEventListener('click', async () => {
+                bluetoothModal.style.display = 'none';
+                await connectBluetooth();
+            });
+            
+            modalCancelBtn.addEventListener('click', () => {
+                bluetoothModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === bluetoothModal) {
+                    bluetoothModal.style.display = 'none';
+                }
+            });
+            
+            // Clear log button
+            document.getElementById('clear-log').addEventListener('click', () => {
+                logEntries.innerHTML = '';
+                addLogEntry('Log cleared', 'info');
+            });
+            
+            // Add instructions to log
+            setTimeout(() => {
+                addLogEntry('Press 1, 2, or 3 to simulate RFID card scans', 'info');
+                addLogEntry('Click "Connect Bluetooth" to pair with Arduino', 'info');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
